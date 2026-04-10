@@ -44,21 +44,18 @@ pipeline {
 
     stages {
 
-        // ================= CHECKOUT =================
         stage('Checkout') {
             steps {
                 git branch: 'master', url: 'https://github.com/nissrinayy/NewCity-Mobile-FE.git'
             }
         }
 
-        // ================= PREPARE =================
         stage('Prepare Workspace') {
             steps {
                 bat 'if not exist apk-outputs mkdir apk-outputs'
             }
         }
 
-        // ================= FLUTTER ENV =================
         stage('Flutter Environment Check') {
             steps {
                 bat """
@@ -69,38 +66,38 @@ pipeline {
             }
         }
 
-        // ================= BUILD APK =================
         stage('Build APK') {
             steps {
-                bat """
-                flutter pub get
-                flutter build apk --${params.BUILD_TYPE} --no-split-per-abi
-                echo ========== APK OUTPUT LISTING ==========
-                dir build\\app\\outputs\\flutter-apk
-                echo ========== END LISTING ==========
-                """
-            }
-        }
-
-        // ================= SAST =================
-        stage('SAST - Static Analysis (MobSF)') {
-            steps {
                 script {
+                    bat """
+                    flutter pub get
+                    flutter build apk --${params.BUILD_TYPE} --no-split-per-abi
+                    echo ========== APK OUTPUT LISTING ==========
+                    dir build\\app\\outputs\\flutter-apk
+                    echo ========== END LISTING ==========
+                    """
+
                     def apkFiles = findFiles(glob: "build/app/outputs/flutter-apk/*.apk")
                     if (apkFiles.length == 0) {
                         error "No APK files found!"
                     }
 
-                    def apkPath = apkFiles[0].path
-                    echo "APK found: ${apkPath}"
+                    env.APK_PATH = apkFiles[0].path
+                    echo "APK stored: ${env.APK_PATH}"
+                }
+            }
+        }
 
+        stage('SAST - Static Analysis (MobSF)') {
+            steps {
+                script {
                     echo "Uploading APK to MobSF (SAST)..."
 
                     def uploadResponse = bat(
                         script: """
                         @curl -s ^
                         -H "Authorization: ${env.MOBSF_TOKEN}" ^
-                        -F "file=@${apkPath}" ^
+                        -F "file=@${env.APK_PATH}" ^
                         ${env.MOBSF_URL}/api/v1/upload
                         """,
                         returnStdout: true
@@ -139,7 +136,6 @@ pipeline {
             }
         }
 
-        // ================= EMULATOR =================
         stage('Start Emulator') {
             steps {
                 bat """
@@ -154,15 +150,13 @@ pipeline {
             }
         }
 
-        // ================= INSTALL APK =================
         stage('Install APK') {
             steps {
                 script {
                     def timestamp  = new Date().format("dd-MM-yyyy_HH-mm-ss")
-                    def sourcePath = "build\\app\\outputs\\flutter-apk\\app-${params.BUILD_TYPE}.apk"
                     def destPath   = "apk-outputs\\newcity-${params.BUILD_TYPE}-${timestamp}.apk"
 
-                    bat "copy \"${sourcePath}\" \"${destPath}\""
+                    bat "copy \"${env.APK_PATH}\" \"${destPath}\""
 
                     bat(script: "adb uninstall ${env.APP_PACKAGE}", returnStatus: true)
                     bat "adb install -r \"${destPath}\""
@@ -170,7 +164,6 @@ pipeline {
             }
         }
 
-        // ================= DAST =================
         stage('DAST - Dynamic Analysis (MobSF)') {
             steps {
                 script {
@@ -241,13 +234,11 @@ pipeline {
             }
         }
 
-        // ================= CLEANUP =================
         stage('Cleanup') {
             steps {
                 bat 'taskkill /F /IM qemu-system-x86_64.exe /T || echo Emulator already stopped'
             }
         }
-
     }
 
     post {
