@@ -69,13 +69,17 @@ pipeline {
         stage('Build APK') {
             steps {
                 script {
-                    bat """
-                    flutter pub get
-                    flutter build apk --${params.BUILD_TYPE} --no-split-per-abi
+                    bat '''
+                    call flutter pub get
+                    if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
+
+                    call flutter build apk --debug --no-split-per-abi
+                    if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
+
                     echo ========== APK OUTPUT LISTING ==========
                     dir build\\app\\outputs\\flutter-apk
                     echo ========== END LISTING ==========
-                    """
+                    '''
 
                     def apkFiles = findFiles(glob: "build/app/outputs/flutter-apk/*.apk")
                     if (apkFiles.length == 0) {
