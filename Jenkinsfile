@@ -84,7 +84,7 @@ pipeline {
         stage('SAST - Static Analysis (MobSF)') {
             steps {
                 script {
-                    def apkPath = "build/app/outputs/flutter-apk/app-${params.BUILD_TYPE}.apk"
+                    def apkPath = "build\\app\\outputs\\flutter-apk\\app-${params.BUILD_TYPE}.apk"
                     if (!fileExists(apkPath)) {
                         error "APK not found: ${apkPath}"
                     }
