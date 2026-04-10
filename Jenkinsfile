@@ -74,8 +74,10 @@ pipeline {
             steps {
                 bat """
                 flutter pub get
-                flutter build apk --${params.BUILD_TYPE}
+                flutter build apk --${params.BUILD_TYPE} --no-split-per-abi
+                echo ========== APK OUTPUT LISTING ==========
                 dir build\\app\\outputs\\flutter-apk
+                echo ========== END LISTING ==========
                 """
             }
         }
@@ -84,10 +86,13 @@ pipeline {
         stage('SAST - Static Analysis (MobSF)') {
             steps {
                 script {
-                    def apkPath = "build\\app\\outputs\\flutter-apk\\app-${params.BUILD_TYPE}.apk"
-                    if (!fileExists(apkPath)) {
-                        error "APK not found: ${apkPath}"
+                    def apkFiles = findFiles(glob: "build/app/outputs/flutter-apk/*.apk")
+                    if (apkFiles.length == 0) {
+                        error "No APK files found!"
                     }
+
+                    def apkPath = apkFiles[0].path
+                    echo "APK found: ${apkPath}"
 
                     echo "Uploading APK to MobSF (SAST)..."
 
