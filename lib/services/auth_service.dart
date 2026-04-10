@@ -1,10 +1,15 @@
 import 'package:dio/dio.dart';
 import 'dio_client.dart';
+import 'mock_auth_service.dart';
+
+const bool USE_MOCK = true;
 
 class AuthService {
   static final Dio dio = DioClient.instance;
 
   static Future<dynamic> login(String username, String password) async {
+    if (USE_MOCK) return MockAuthService.login(username, password);
+    
     try {
       final response = await dio.post(
         'api/login',

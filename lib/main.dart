@@ -8,6 +8,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'app/routes/app_pages.dart';
+import 'services/dio_client.dart';
 
 import 'themes/app_theme.dart';
 
@@ -34,7 +35,7 @@ void main() async {
     GetMaterialApp(
       title: "Application",
       theme: AppTheme.lightTheme,
-      initialRoute: AppPages.INITIAL,
+      initialRoute: USE_MOCK ? Routes.DASHBOARD : AppPages.INITIAL,
       getPages: AppPages.routes,
       debugShowCheckedModeBanner: false,
     ),

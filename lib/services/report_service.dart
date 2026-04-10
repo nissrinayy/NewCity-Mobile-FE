@@ -2,11 +2,16 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'dio_client.dart';
 import 'package:newcity/models/report.dart';
+import 'mock_report_service.dart';
+
+const bool USE_MOCK = true;
 
 class ReportService {
   static final Dio dio = DioClient.instance;
 
   static Future<dynamic> postReport(var data) async {
+    if (USE_MOCK) return MockReportService.postReport(data);
+    
     final response = await dio.post(
       'api/report',
       data: data,
@@ -20,6 +25,7 @@ class ReportService {
   }
 
   static Future<ReportResponsePagination?> getReport(int page) async {
+    if (USE_MOCK) return MockReportService.getReport(page);
     try {
       final response =
           await dio.get('api/report', queryParameters: {'page': page});
@@ -34,6 +40,7 @@ class ReportService {
 
   static Future<ReportResponsePagination?> getSearchedReport(
       int page, String keyword) async {
+    if (USE_MOCK) return MockReportService.getSearchedReport(page, keyword);
     try {
       final response = await dio.get(
         'api/report/search',
@@ -54,6 +61,7 @@ class ReportService {
   }
 
   static Future<ReportResponsePagination?> getBookmarkedReport(int page) async {
+    if (USE_MOCK) return MockReportService.getBookmarkedReport(page);
     try {
       final response =
           await dio.get('api/report/bookmark', queryParameters: {'page': page});
@@ -68,6 +76,7 @@ class ReportService {
 
   static Future<ReportResponsePagination?> getReportByStatus(
       int page, status) async {
+    if (USE_MOCK) return MockReportService.getReportByStatus(page, status);
     try {
       final response = await dio
           .get('api/report/status/$status', queryParameters: {'page': page});
@@ -83,6 +92,7 @@ class ReportService {
   }
 
   static Future<ReportResponse?> getReportDetail(int id) async {
+    if (USE_MOCK) return MockReportService.getReportDetail(id);
     try {
       final response = await dio.get('api/report/$id');
       return response.statusCode == 200
@@ -95,6 +105,7 @@ class ReportService {
   }
 
   static Future<dynamic> addStatus(int id, String status) async {
+    if (USE_MOCK) return MockReportService.addStatus(id, status);
     try {
       final response = await dio.post(
         'api/report/status/$id',
@@ -112,6 +123,7 @@ class ReportService {
   }
 
   static Future<dynamic> toggleLikeReport(int id) async {
+    if (USE_MOCK) return MockReportService.toggleLikeReport(id);
     try {
       final response =
           await dio.post('api/report/like', data: {'id': id, "loaded": false});
@@ -127,6 +139,7 @@ class ReportService {
   }
 
   static Future<dynamic> toggleBookmark(int id) async {
+    if (USE_MOCK) return MockReportService.toggleBookmark(id);
     try {
       final response = await dio
           .post('api/report/bookmark', data: {'id': id, "loaded": false});
@@ -142,6 +155,7 @@ class ReportService {
   }
 
   static Future<List<Comment>?> getComments(int id) async {
+    if (USE_MOCK) return MockReportService.getComments(id);
     try {
       final response = await dio.get(
         'api/report/diskusi/$id',
@@ -158,6 +172,7 @@ class ReportService {
   }
 
   static Future<dynamic> postComment(int id, String content) async {
+    if (USE_MOCK) return MockReportService.postComment(id, content);
     try {
       final response =
           await dio.post('api/report/diskusi/$id', data: {'content': content});
@@ -188,6 +203,7 @@ class ReportService {
 
   static Future<ReportResponsePagination?> getReportByKategori(
       int page, id) async {
+    if (USE_MOCK) return MockReportService.getReportByKategori(page, id);
     try {
       final response = await dio
           .get('api/report/category/$id', queryParameters: {'page': page});
@@ -203,6 +219,7 @@ class ReportService {
   }
 
   static Future<ReportResponsePagination?> getLikedReports(int page) async {
+    if (USE_MOCK) return MockReportService.getLikedReports(page);
     try {
       final response = await dio.get(
         'api/report/liked',
@@ -221,6 +238,7 @@ class ReportService {
   }
 
   static Future<ReportResponsePagination?> getMyReports(int page) async {
+    if (USE_MOCK) return MockReportService.getMyReports(page);
     try {
       final response = await dio.get(
         'api/report/my',

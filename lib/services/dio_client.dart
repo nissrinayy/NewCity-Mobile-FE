@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:get_storage/get_storage.dart';
 
+const bool USE_MOCK = true;
+
 class DioClient {
   static final GetStorage storage = GetStorage();
   static Dio? _dio;
@@ -29,6 +31,9 @@ class DioClient {
 
   static void _setAuthToken(Dio dio) {
     String? token = storage.read('access_token');
+    if (USE_MOCK && (token == null || token.isEmpty)) {
+      token = 'mock_token_123456';
+    }
     if (token != null) {
       dio.options.headers['Authorization'] = 'Bearer $token';
     }
